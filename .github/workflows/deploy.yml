@@ -51,7 +51,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "."
-          target: "~/tg-bot"
+          target: "~/nihuybot"
           strip_components: 1
           overwrite: true
           rm: true
@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/tg-bot
+            cd ~/nihuybot
             
             # Создаем .env файл на сервере из секретов GitHub
             cat <<EOT > .env
