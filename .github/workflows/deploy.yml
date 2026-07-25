@@ -65,7 +65,7 @@ jobs:
           script: |
             cd ~/nihuybot
             
-            # Создаем .env файл на сервере из секретов GitHub
+            # Создаем .env файл
             cat <<EOT > .env
             BOT_TOKEN=${{ secrets.BOT_TOKEN }}
             POSTGRES_USER=${{ secrets.POSTGRES_USER }}
@@ -74,10 +74,14 @@ jobs:
             DB_HOST=db
             EOT
             
-            # Останавливаем старые контейнеры, собираем новые и запускаем
+            # Pull images first (быстрее чем build --no-cache)
+            docker compose pull
+            
+            # Останавливаем старые контейнеры
             docker compose down
-            docker compose build --no-cache
+            
+            # Запускаем (без --no-cache для ускорения)
             docker compose up -d
             
-            # Чистим старые неиспользуемые образы, чтобы не забивать диск
+            # Чистим старые образы
             docker image prune -f
