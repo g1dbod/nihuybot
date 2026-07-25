@@ -9,7 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Копируем код
 COPY . .
 
-# Метка с датой сборки для отслеживания
-LABEL build-date=$(date +%Y%m%d%H%M%S)
-
 CMD ["python", "-m", "app.bot"]
