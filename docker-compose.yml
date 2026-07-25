@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:16-alpine
@@ -8,20 +10,31 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - bot_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   bot:
     build: .
+    image: nihuybot-bot:${VERSION:-latest}  # Используем теги
     restart: always
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - bot_network
-
-volumes:
-  pgdata:
-
-networks:
-  bot_network:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Автоматический рестарт при падении
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3

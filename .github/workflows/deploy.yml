@@ -74,14 +74,21 @@ jobs:
             DB_HOST=db
             EOT
             
-            # Pull images first (быстрее чем build --no-cache)
-            docker compose pull
-            
-            # Останавливаем старые контейнеры
+            # Полная очистка перед деплоем
             docker compose down
+            docker rmi nihuybot-bot:latest 2>/dev/null || true
             
-            # Запускаем (без --no-cache для ускорения)
+            # Pull образов (быстрее чем build)
+            docker compose pull db
+            
+            # Сборка БЕЗ кэша
+            docker compose build --no-cache bot
+            
+            # Запуск
             docker compose up -d
             
-            # Чистим старые образы
+            # Чистка старых образов
             docker image prune -f
+            
+            # Проверка что всё работает
+            docker compose ps
