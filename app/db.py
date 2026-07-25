@@ -5,12 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Параметры подключения берутся из переменных окружения (они же пойдут в Docker)
+# Параметры подключения
 POSTGRES_USER = os.getenv("POSTGRES_USER", "bot_user")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "supersecret")
 POSTGRES_DB = os.getenv("POSTGRES_DB", "bot_db")
-# В docker-compose хост будет называться 'db'
-DB_HOST = os.getenv("DB_HOST", "db") 
+DB_HOST = os.getenv("DB_HOST", "db")
 
 DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:5432/{POSTGRES_DB}"
 
@@ -33,7 +32,3 @@ class User(Base):
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-async def get_session() -> AsyncSession:
-    async with async_session() as session:
-        yield session
