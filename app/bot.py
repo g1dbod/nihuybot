@@ -3,9 +3,6 @@ import logging
 import os
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.types import BufferedInputFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from dotenv import load_dotenv
@@ -16,19 +13,18 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Middleware для передачи сессии БД
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
     async with async_session() as session:
-        # Проверяем, есть ли юзер в БД
-        result = await session.execute(select(User).where(User.telegram_id == message.from_user.id))
+        result = await session.execute(
+            select(User).where(User.telegram_id == message.from_user.id)
+        )
         user = result.scalar_one_or_none()
         
         if not user:
-            # Сохраняем нового пользователя
             new_user = User(
                 telegram_id=message.from_user.id,
                 username=message.from_user.username,
@@ -44,7 +40,9 @@ async def cmd_start(message: types.Message):
 @dp.message(F.text == "/info")
 async def cmd_info(message: types.Message):
     async with async_session() as session:
-        result = await session.execute(select(User).where(User.telegram_id == message.from_user.id))
+        result = await session.execute(
+            select(User).where(User.telegram_id == message.from_user.id)
+        )
         user = result.scalar_one_or_none()
         
         if user:
@@ -57,8 +55,7 @@ async def cmd_info(message: types.Message):
             await message.answer("Тебя нет в базе. Нажми /start")
 
 async def main():
-    await init_db()  # Создаем таблицы при старте
-    logging.info("Запуск бота...")
+    await init_db()
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
